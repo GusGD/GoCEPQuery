@@ -45,11 +45,11 @@ func main() {
 	go func() {
 		// time.Sleep(time.Second)
 		endereco := &Endereco{}
-		requestAPI("https://viacep.com.br/ws/"+cep+"/json/", chViaCep, &endereco)
+		requestAPI("https://viacep.com.br/ws/"+cep+"/json/", chViaCep, endereco)
 	}()
 
 	go func() {
-		// time.Sleep(time.Second)
+		time.Sleep(time.Second)
 		address := &Address{}
 		requestAPI("https://brasilapi.com.br/api/cep/v1/"+cep, chBrasilCep, address)
 	}()
