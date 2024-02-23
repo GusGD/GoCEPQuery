@@ -49,7 +49,7 @@ func main() {
 	}()
 
 	go func() {
-		time.Sleep(time.Second)
+		//time.Sleep(time.Second)
 		address := &Address{}
 		requestAPI("https://brasilapi.com.br/api/cep/v1/"+cep, chBrasilCep, address)
 	}()
