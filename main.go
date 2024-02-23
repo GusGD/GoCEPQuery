@@ -18,8 +18,7 @@ type Endereco struct {
 }
 
 func (e *Endereco) String() string {
-	return fmt.Sprintf("Cep: %s, Logradouro: %s, Complemento: %s, Bairro: %s, Localidade: %s, Uf: %s",
-		e.Cep, e.Logradouro, e.Complemento, e.Bairro, e.Localidade, e.Uf)
+	return fmt.Sprintf("CEP: %s, Logradouro: %s, Complemento: %s, Bairro:%s, Localidade: %s, UF: %s", e.Cep, e.Logradouro, e.Complemento, e.Bairro, e.Localidade, e.Uf)
 }
 
 type Address struct {
@@ -31,8 +30,7 @@ type Address struct {
 }
 
 func (a *Address) String() string {
-	return fmt.Sprintf("Cep: %s, Street: %s, Neighborhood: %s, City: %s, State: %s",
-		a.Cep, a.Street, a.Neighborhood, a.City, a.State)
+	return fmt.Sprintf("CEP: %s, State: %s, City: %s, Neighborhood: %s, Street: %s", a.Cep, a.State, a.City, a.Neighborhood, a.Street)
 }
 
 func main() {
@@ -45,13 +43,13 @@ func main() {
 	timeout := time.After(time.Second)
 
 	go func() {
-		// time.Sleep(time.Second * 2)
+		// time.Sleep(time.Second)
 		endereco := &Endereco{}
-		requestAPI("https://viacep.com.br/ws/"+cep+"/json/", chViaCep, endereco)
+		requestAPI("https://viacep.com.br/ws/"+cep+"/json/", chViaCep, &endereco)
 	}()
 
 	go func() {
-		// time.Sleep(time.Second * 2)
+		// time.Sleep(time.Second)
 		address := &Address{}
 		requestAPI("https://brasilapi.com.br/api/cep/v1/"+cep, chBrasilCep, address)
 	}()
@@ -59,13 +57,14 @@ func main() {
 	select {
 	case res := <-chViaCep:
 		endereco := res.(*Endereco)
-		fmt.Println("Resultado da API ViaCep:", endereco.String())
+		fmt.Println("Resultado via CEP:", endereco.String())
 	case res := <-chBrasilCep:
 		address := res.(*Address)
-		fmt.Printf("Resultado da API BrasilApi: %+v\n", address)
+		fmt.Println("Resultado Brasil API:", address.String())
 	case <-timeout:
-		fmt.Println("Erro de timeout: nenhuma resposta em 1 segundo")
+		fmt.Println("Timeout")
 	}
+
 }
 
 func requestAPI(url string, ch chan<- interface{}, result interface{}) {
@@ -73,15 +72,13 @@ func requestAPI(url string, ch chan<- interface{}, result interface{}) {
 		Timeout: time.Second,
 	}
 	res, err := client.Get(url)
-
 	if err != nil {
 		ch <- fmt.Sprint(err)
 		return
 	}
 	defer res.Body.Close()
 	body, _ := io.ReadAll(res.Body)
-
 	json.Unmarshal(body, result)
-
 	ch <- result
+
 }
